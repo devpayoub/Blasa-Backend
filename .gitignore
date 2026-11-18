@@ -1,0 +1,51 @@
+# --- Secrets / local environment -------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Python ----------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+env/
+
+# --- Django ----------------------------------------------------------------------
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+apps/api/staticfiles/
+apps/api/media/
+local_settings.py
+
+# --- Test / lint caches ----------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- Generated artefacts that must never be committed ----------------------------
+# Access/refresh tokens captured by the API smoke-test script.
+apps/api/generated/_tokens.json
+
+# --- Tooling / editor ------------------------------------------------------------
+.workbuddy-ai/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,111 @@
+# Render Blueprint — free-tier test deployment for the Blasa API.
+#
+# Deliberately excludes the database and Redis: Render's free Postgres is
+# DELETED 30 days after creation and has no free Key Value tier. Point
+# DATABASE_URL at Neon and REDIS_URL at Upstash instead (see
+# docs/deploy-free-tier.md).
+#
+# Usage: push this file to the repo root, then in Render choose
+# New > Blueprint and select the repo.
+
+services:
+  - type: web
+    name: blasa-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./infra/docker/api.render.Dockerfile
+    dockerContext: ./apps/api
+    healthCheckPath: /healthz
+    # --workers 1: the free instance has 512 MB RAM. Four uvicorn workers plus
+    # GDAL will be OOM-killed.
+    dockerCommand: >-
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.asgi:application
+                      -k uvicorn.workers.UvicornWorker
+                      -b 0.0.0.0:$PORT
+                      --workers 1
+                      --timeout 120"
+    envVars:
+      # manage.py, celery.py and asgi.py all default to config.settings.dev.
+      # Without this the container boots in DEBUG mode with SQLite.
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # prod.py raises RuntimeError at import if this is empty.
+      - key: DJANGO_ALLOWED_HOSTS
+        value: blasa-api.onrender.com
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+
+      # --- Neon Postgres (PostGIS) ---
+      # Append ?sslmode=require. Neon's host is <project>-pooler.<region>.aws.neon.tech
+      - key: DATABASE_URL
+        sync: false
+
+      # --- Upstash Redis ---
+      # Must use the TLS scheme: rediss://default:<password>@<host>:6379
+      - key: REDIS_URL
+        sync: false
+
+      # Celery: no free background worker on Render, so tasks run inline in the
+      # web process. Set to 0 once you run a real worker.
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "1"
+
+      # --- Cloudflare R2 (private document bucket) ---
+      - key: S3_BUCKET_PRIVATE
+        sync: false
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+
+      # --- Brevo (email + SMS over HTTPS) ---
+      # Render's free tier blocks outbound SMTP, so a Brevo API key switches the
+      # email backend to core.delivery.brevo.BrevoEmailBackend and the SMS
+      # adapter to Brevo's transactional SMS API automatically.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SMS_SENDER
+        value: Blasa
+      - key: DEFAULT_FROM_EMAIL
+        value: Blasa <no-reply@blasa.tn>
+
+      # Verification uploads are OFF by default in prod (Law 2004-63 gate).
+      # Turn on only for a throwaway test environment.
+      - key: IDENTITY_DOCUMENT_UPLOADS_ENABLED
+        value: "0"
+
+      # Flouci sandbox keys. The webhook needs a public URL, which Render gives
+      # you: https://blasa-api.onrender.com/api/v1/payments/webhooks/flouci/
+      - key: FLOUCI_APP_KEY
+        sync: false
+      - key: FLOUCI_PRIVATE_KEY
+        sync: false
+      - key: FLOUCI_PUBLIC_KEY
+        sync: false
+      - key: FLOUCI_WEBHOOK_SECRET
+        sync: false
+
+      # The Expo dev client is not a browser, so CORS mostly matters for the
+      # web build and Swagger. Add your Expo web origin here if you use it.
+      - key: CORS_ALLOWED_ORIGINS
+        value: http://localhost:8081
+
+      # Optional
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_ENVIRONMENT
+        value: production
+      - key: SENTRY_TRACES_RATE
+        value: "0.05"

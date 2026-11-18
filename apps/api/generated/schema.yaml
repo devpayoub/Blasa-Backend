@@ -1,0 +1,6646 @@
+openapi: 3.0.3
+info:
+  title: Blasa API
+  version: 1.0.0
+  description: Ride-sharing and carpooling platform for Tunisia (Tunis, Sousse). Phone-number
+    OTP auth, verified drivers, rides and bookings, a double-entry wallet ledger and
+    gateway payments. Amounts are TND in millimes (3 decimals).
+paths:
+  /api/v1/auth/contact/check/:
+    post:
+      operationId: v1_auth_contact_check_create
+      description: |-
+        Tell the client whether to reveal the password field or start registration.
+
+        Only existence and "has a usable password" are returned — never a name,
+        profile or contact confirmation beyond the input the caller already has.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactCheck'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactCheck'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactCheck'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactCheckResult'
+          description: ''
+  /api/v1/auth/contact/request/:
+    post:
+      operationId: v1_auth_contact_request_create
+      description: Request a contact LINK proof bound to this account and access-token
+        session.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/contact/verify/:
+    post:
+      operationId: v1_auth_contact_verify_create
+      description: Prove and replace a linked contact; never merge accounts or steal
+        contacts.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactVerify'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/email/request/:
+    post:
+      operationId: v1_auth_email_request_create
+      description: Request an email login proof without disclosing account existence.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/email/verify/:
+    post:
+      operationId: v1_auth_email_verify_create
+      description: Consume an email LOGIN proof, creating an email-only account if
+        necessary.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailVerify'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      description: Blacklist the supplied refresh token.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Logout'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/otp/request/:
+    post:
+      operationId: v1_auth_otp_request_create
+      description: Ask for an SMS login code; the response never includes the code.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/otp/verify/:
+    post:
+      operationId: v1_auth_otp_verify_create
+      description: Consume an SMS login proof and issue tokens only to an active account.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpVerify'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/password/login/:
+    post:
+      operationId: v1_auth_password_login_create
+      description: Password sign-in for accounts that completed registration.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordLogin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordLogin'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/register/complete/:
+    post:
+      operationId: v1_auth_register_complete_create
+      description: Set name, password and role on the account created by the OTP proof.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CompleteRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CompleteRegistration'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: v1_auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Logout'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/bookings/:
+    get:
+      operationId: v1_bookings_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: ride
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+    post:
+      operationId: v1_bookings_create
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Booking'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Booking'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/bookings/{id}/:
+    get:
+      operationId: v1_bookings_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/bookings/{id}/cancellation-quote/:
+    get:
+      operationId: v1_bookings_cancellation_quote_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationQuote'
+          description: ''
+  /api/v1/bookings/{id}/payment-quote/:
+    get:
+      operationId: v1_bookings_payment_quote_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentQuote'
+          description: ''
+  /api/v1/bookings/{id}/transitions/{name}/:
+    post:
+      operationId: v1_bookings_transitions_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this booking.
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^[a-z_]+$
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transition'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Transition'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Transition'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/brands/brands/:
+    get:
+      operationId: v1_brands_brands_list
+      description: The caller's brand. Creation stays staff-only; owners may edit
+        contact details.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBrandList'
+          description: ''
+    post:
+      operationId: v1_brands_brands_create
+      description: The caller's brand. Creation stays staff-only; owners may edit
+        contact details.
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Brand'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+  /api/v1/brands/brands/{id}/:
+    get:
+      operationId: v1_brands_brands_retrieve
+      description: The caller's brand. Creation stays staff-only; owners may edit
+        contact details.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this brand.
+        required: true
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+    put:
+      operationId: v1_brands_brands_update
+      description: The caller's brand. Creation stays staff-only; owners may edit
+        contact details.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this brand.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Brand'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+    patch:
+      operationId: v1_brands_brands_partial_update
+      description: The caller's brand. Creation stays staff-only; owners may edit
+        contact details.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this brand.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBrand'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBrand'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBrand'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+  /api/v1/brands/brands/mine/:
+    get:
+      operationId: v1_brands_brands_mine_retrieve
+      description: The caller's brand. Creation stays staff-only; owners may edit
+        contact details.
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+  /api/v1/brands/campaigns/:
+    get:
+      operationId: v1_brands_campaigns_list
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCampaignList'
+          description: ''
+    post:
+      operationId: v1_brands_campaigns_create
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+          description: ''
+  /api/v1/brands/campaigns/{id}/:
+    get:
+      operationId: v1_brands_campaigns_retrieve
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+          description: ''
+    put:
+      operationId: v1_brands_campaigns_update
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+          description: ''
+    patch:
+      operationId: v1_brands_campaigns_partial_update
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCampaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCampaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCampaign'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+          description: ''
+  /api/v1/brands/campaigns/{id}/analytics/:
+    get:
+      operationId: v1_brands_campaigns_analytics_retrieve
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignAnalytics'
+          description: ''
+  /api/v1/brands/campaigns/{id}/fund/:
+    post:
+      operationId: v1_brands_campaigns_fund_create
+      description: Staff-reconciled transfer. Brand accounts never reach this path.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundingIntent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FundingIntent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FundingIntent'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/brands/campaigns/{id}/funding-intents/:
+    post:
+      operationId: v1_brands_campaigns_funding_intents_create
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundingIntent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FundingIntent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FundingIntent'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingResult'
+          description: ''
+  /api/v1/brands/campaigns/{id}/pause/:
+    post:
+      operationId: v1_brands_campaigns_pause_create
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+          description: ''
+  /api/v1/brands/campaigns/{id}/promo-codes/:
+    get:
+      operationId: v1_brands_campaigns_promo_codes_list
+      description: 'GET: codes issued by this campaign. POST: issue one within the
+        remaining budget.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPromoCodeList'
+          description: ''
+    post:
+      operationId: v1_brands_campaigns_promo_codes_create
+      description: 'GET: codes issued by this campaign. POST: issue one within the
+        remaining budget.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoCodeCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PromoCodeCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PromoCodeCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPromoCodeList'
+          description: ''
+  /api/v1/brands/campaigns/{id}/resume/:
+    post:
+      operationId: v1_brands_campaigns_resume_create
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Campaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+          description: ''
+  /api/v1/brands/campaigns/{id}/sponsored-rides/:
+    get:
+      operationId: v1_brands_campaigns_sponsored_rides_list
+      description: 'GET: rides this campaign sponsors. POST: attach one (same brand
+        only).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSponsoredRideList'
+          description: ''
+    post:
+      operationId: v1_brands_campaigns_sponsored_rides_create
+      description: 'GET: rides this campaign sponsors. POST: attach one (same brand
+        only).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsoredRideCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SponsoredRideCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SponsoredRideCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSponsoredRideList'
+          description: ''
+  /api/v1/brands/campaigns/{id}/sponsored-rides/{ride_id}/:
+    delete:
+      operationId: v1_brands_campaigns_sponsored_rides_destroy
+      description: Campaign management for the owning brand, plus funding, promo and
+        analytics actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this campaign.
+        required: true
+      - in: path
+        name: ride_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - brands
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/brands/sponsored-rides/:
+    post:
+      operationId: v1_brands_sponsored_rides_create
+      description: Staff-only surface for attaching a ride to a campaign.
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsoredRide'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SponsoredRide'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SponsoredRide'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsoredRide'
+          description: ''
+  /api/v1/brands/sponsorship/{ride_id}/:
+    get:
+      operationId: v1_brands_sponsorship_retrieve
+      description: 'Passenger-facing sponsored content for one ride: labeled, aggregate
+        only.'
+      parameters:
+      - in: path
+        name: ride_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - brands
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorSummary'
+          description: ''
+        '404':
+          description: No response body
+  /api/v1/brands/sponsorship/{ride_id}/events/:
+    post:
+      operationId: v1_brands_sponsorship_events_create
+      description: |-
+        Impression/engagement reported by the member who saw the sponsored card.
+
+        The dedupe key is derived on the server (campaign, ride, member, kind, day),
+        so a client cannot inflate counts by replaying. Financial outcomes are never
+        accepted here: redemptions come from the ledger-backed voucher flow.
+      parameters:
+      - in: path
+        name: ride_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - brands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignEventInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CampaignEventInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CampaignEventInput'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/conversations/:
+    get:
+      operationId: v1_conversations_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConversationList'
+          description: ''
+  /api/v1/conversations/{conversation_id}/messages/:
+    get:
+      operationId: v1_conversations_messages_list
+      description: Chat history for a conversation the caller participates in.
+      parameters:
+      - in: path
+        name: conversation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+          description: ''
+    post:
+      operationId: v1_conversations_messages_create
+      description: REST fallback for sending a message (the websocket is the primary
+        channel).
+      parameters:
+      - in: path
+        name: conversation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Message'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Message'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+          description: ''
+  /api/v1/conversations/{id}/:
+    get:
+      operationId: v1_conversations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this conversation.
+        required: true
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+          description: ''
+  /api/v1/incentives/campaigns/:
+    get:
+      operationId: v1_incentives_campaigns_list
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - incentives
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIncentiveCampaignList'
+          description: ''
+    post:
+      operationId: v1_incentives_campaigns_create
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncentiveCampaign'
+          description: ''
+  /api/v1/incentives/campaigns/{id}/:
+    get:
+      operationId: v1_incentives_campaigns_retrieve
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this incentive campaign.
+        required: true
+      tags:
+      - incentives
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncentiveCampaign'
+          description: ''
+    put:
+      operationId: v1_incentives_campaigns_update
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this incentive campaign.
+        required: true
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncentiveCampaign'
+          description: ''
+    patch:
+      operationId: v1_incentives_campaigns_partial_update
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this incentive campaign.
+        required: true
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIncentiveCampaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIncentiveCampaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIncentiveCampaign'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncentiveCampaign'
+          description: ''
+  /api/v1/incentives/campaigns/{id}/evaluate/:
+    post:
+      operationId: v1_incentives_campaigns_evaluate_create
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this incentive campaign.
+        required: true
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncentiveCampaign'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncentiveCampaign'
+          description: ''
+  /api/v1/incentives/campaigns/{id}/fund/:
+    post:
+      operationId: v1_incentives_campaigns_fund_create
+      description: Staff-only management of welcome-credit and fuel-reward campaigns.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this incentive campaign.
+        required: true
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignFund'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CampaignFund'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CampaignFund'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignFund'
+          description: ''
+  /api/v1/incentives/fuel/redeem/:
+    post:
+      operationId: v1_incentives_fuel_redeem_create
+      description: Staff record a fuel reward honoured at a partner station (manual
+        until a partner is contracted).
+      tags:
+      - incentives
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/incentives/rewards/:
+    get:
+      operationId: v1_incentives_rewards_list
+      description: The caller's welcome credit and fuel rewards.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - incentives
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIncentiveAwardList'
+          description: ''
+  /api/v1/incentives/vouchers/:
+    get:
+      operationId: v1_incentives_vouchers_list
+      description: 'GET: the caller''s live vouchers. POST (staff): issue a voucher.
+        POST claim/: redeem an open code.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - incentives
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVoucherList'
+          description: ''
+    post:
+      operationId: v1_incentives_vouchers_create
+      description: 'GET: the caller''s live vouchers. POST (staff): issue a voucher.
+        POST claim/: redeem an open code.'
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Voucher'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Voucher'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Voucher'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voucher'
+          description: ''
+  /api/v1/incentives/vouchers/claim/:
+    post:
+      operationId: v1_incentives_vouchers_claim_create
+      description: 'GET: the caller''s live vouchers. POST (staff): issue a voucher.
+        POST claim/: redeem an open code.'
+      tags:
+      - incentives
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoucherClaim'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VoucherClaim'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VoucherClaim'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoucherClaim'
+          description: ''
+  /api/v1/interests/:
+    get:
+      operationId: v1_interests_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - interests
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInterestList'
+          description: ''
+    post:
+      operationId: v1_interests_create
+      tags:
+      - interests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Interest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Interest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interest'
+          description: ''
+  /api/v1/interests/{id}/:
+    get:
+      operationId: v1_interests_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this interest.
+        required: true
+      tags:
+      - interests
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interest'
+          description: ''
+    delete:
+      operationId: v1_interests_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this interest.
+        required: true
+      tags:
+      - interests
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/matching/interests/{interest_id}/rides/:
+    get:
+      operationId: v1_matching_interests_rides_list
+      description: Ranked open rides for one of the caller's interests, best route
+        first.
+      parameters:
+      - in: path
+        name: interest_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - matching
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScoredRideList'
+          description: ''
+  /api/v1/matching/rides/{ride_id}/interests/:
+    get:
+      operationId: v1_matching_rides_interests_list
+      description: Ranked active interests for one of the caller's (driver's) rides,
+        best route first.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: ride_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - matching
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScoredInterestList'
+          description: ''
+  /api/v1/moderation/audit/{object_type}/{object_id}/:
+    get:
+      operationId: v1_moderation_audit_list
+      description: Staff read of one object's decision history (no request bodies
+        or secrets).
+      parameters:
+      - in: path
+        name: object_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: object_type
+        schema:
+          type: string
+        required: true
+      tags:
+      - moderation
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEntry'
+          description: ''
+  /api/v1/moderation/bans/:
+    get:
+      operationId: v1_moderation_bans_retrieve
+      tags:
+      - moderation
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/moderation/reports/:
+    get:
+      operationId: v1_moderation_reports_list
+      description: 'POST: file a report (any user). GET: full report queue (staff
+        only).'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - moderation
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReportList'
+          description: ''
+    post:
+      operationId: v1_moderation_reports_create
+      description: 'POST: file a report (any user). GET: full report queue (staff
+        only).'
+      tags:
+      - moderation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Report'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Report'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+  /api/v1/moderation/reports/{report_id}/review/:
+    post:
+      operationId: v1_moderation_reports_review_create
+      description: 'Staff decision on a report: DISMISSED or ACTIONED.'
+      parameters:
+      - in: path
+        name: report_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - moderation
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/moderation/rides/{ride_id}/override/:
+    post:
+      operationId: v1_moderation_rides_override_create
+      description: |-
+        Staff investigation/override for a stranded trip.
+
+        Goes through the same ride/booking/ledger services as the owner actions, so
+        seats, refunds and sponsor reversals stay consistent; only the ownership
+        check is skipped and the decision is audited.
+      parameters:
+      - in: path
+        name: ride_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - moderation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RideOverrideInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RideOverrideInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RideOverrideInput'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RideOverrideResult'
+          description: ''
+  /api/v1/moderation/users/{user_id}/ban/:
+    post:
+      operationId: v1_moderation_users_ban_create
+      description: Staff-only ban and unban.
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - moderation
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_moderation_users_ban_destroy
+      description: Staff-only ban and unban.
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - moderation
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/:
+    get:
+      operationId: v1_notifications_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: unread
+        schema:
+          type: boolean
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/v1/notifications/{notification_id}/read/:
+    post:
+      operationId: v1_notifications_read_create
+      parameters:
+      - in: path
+        name: notification_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/{id}/:
+    get:
+      operationId: v1_notifications_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this notification.
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/devices/:
+    post:
+      operationId: v1_notifications_devices_create
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeviceRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeviceRegistration'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceToken'
+          description: ''
+    delete:
+      operationId: v1_notifications_devices_destroy
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/preferences/:
+    get:
+      operationId: v1_notifications_preferences_retrieve
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    patch:
+      operationId: v1_notifications_preferences_partial_update
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+  /api/v1/notifications/read-all/:
+    post:
+      operationId: v1_notifications_read_all_create
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationReadAll'
+          description: ''
+  /api/v1/notifications/unread-count/:
+    get:
+      operationId: v1_notifications_unread_count_retrieve
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationCount'
+          description: ''
+  /api/v1/payments/intents/:
+    get:
+      operationId: v1_payments_intents_list
+      description: The caller's own payment attempts, newest first.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentIntentList'
+          description: ''
+  /api/v1/payments/intents/{id}/:
+    get:
+      operationId: v1_payments_intents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+          description: ''
+  /api/v1/payments/intents/{id}/cancel/:
+    post:
+      operationId: v1_payments_intents_cancel_create
+      description: Abandon a pending payment. A later trusted success still credits
+        the wallet.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/payments/topup/:
+    post:
+      operationId: v1_payments_topup_create
+      description: Create a wallet topup. Staff cash settles immediately; Flouci returns
+        a payment URL.
+      tags:
+      - payments
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/payments/webhooks/{gateway}/:
+    post:
+      operationId: v1_payments_webhooks_create
+      description: Inbound gateway notifications. Signature-verified and idempotent;
+        anonymous by design.
+      parameters:
+      - in: path
+        name: gateway
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/ratings/:
+    get:
+      operationId: v1_ratings_list
+      description: POST to rate the other party of a completed booking; GET lists
+        ratings received.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - ratings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRatingList'
+          description: ''
+    post:
+      operationId: v1_ratings_create
+      description: POST to rate the other party of a completed booking; GET lists
+        ratings received.
+      tags:
+      - ratings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rating'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Rating'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Rating'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rating'
+          description: ''
+  /api/v1/reporting/cancellations/:
+    get:
+      operationId: v1_reporting_cancellations_retrieve
+      tags:
+      - reporting
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reporting/export/:
+    get:
+      operationId: v1_reporting_export_retrieve
+      description: 'CSV export: /reporting/export/?dataset=rides|bookings|ledger'
+      tags:
+      - reporting
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reporting/revenue/:
+    get:
+      operationId: v1_reporting_revenue_retrieve
+      tags:
+      - reporting
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reporting/rides/:
+    get:
+      operationId: v1_reporting_rides_retrieve
+      tags:
+      - reporting
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/rides/:
+    get:
+      operationId: v1_rides_list
+      parameters:
+      - in: query
+        name: atmosphere
+        schema:
+          type: string
+          enum:
+          - CONVERSATION
+          - MUSIC
+          - QUIET
+        description: |-
+          Matches rides with this atmosphere or none set
+
+          * `MUSIC` - Music on
+          * `CONVERSATION` - Happy to chat
+          * `QUIET` - Quiet ride
+      - in: query
+        name: departure_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: departure_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: from_lat
+        schema:
+          type: number
+      - in: query
+        name: from_lng
+        schema:
+          type: number
+      - in: query
+        name: from_radius_km
+        schema:
+          type: number
+      - in: query
+        name: max_price
+        schema:
+          type: number
+      - in: query
+        name: min_seats
+        schema:
+          type: integer
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - departure
+          - pickup
+          - price
+        description: |-
+          * `departure` - departure
+          * `price` - price
+          * `pickup` - pickup
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: scope
+        schema:
+          type: string
+          enum:
+          - bookable
+          - joined
+          - mine
+        description: 'bookable (default): open future rides; mine: rides you drive;
+          joined: rides you booked'
+      - in: query
+        name: shared_interests
+        schema:
+          type: boolean
+        description: 'true: only drivers who share at least one of your interests'
+      - in: query
+        name: to_lat
+        schema:
+          type: number
+      - in: query
+        name: to_lng
+        schema:
+          type: number
+      - in: query
+        name: to_radius_km
+        schema:
+          type: number
+      - in: query
+        name: when
+        schema:
+          type: string
+          enum:
+          - active
+          - cancelled
+          - completed
+          - upcoming
+        description: |-
+          * `upcoming` - upcoming
+          * `active` - active
+          * `completed` - completed
+          * `cancelled` - cancelled
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRideList'
+          description: ''
+    post:
+      operationId: v1_rides_create
+      tags:
+      - rides
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ride'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Ride'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Ride'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+  /api/v1/rides/{id}/:
+    get:
+      operationId: v1_rides_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ride.
+        required: true
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+    patch:
+      operationId: v1_rides_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ride.
+        required: true
+      tags:
+      - rides
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRide'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRide'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRide'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+  /api/v1/rides/{id}/cancel/:
+    post:
+      operationId: v1_rides_cancel_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ride.
+        required: true
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+  /api/v1/rides/{id}/cancellation-quote/:
+    get:
+      operationId: v1_rides_cancellation_quote_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ride.
+        required: true
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RideCancellationQuote'
+          description: ''
+  /api/v1/rides/{id}/complete/:
+    post:
+      operationId: v1_rides_complete_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ride.
+        required: true
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+  /api/v1/rides/{id}/start/:
+    post:
+      operationId: v1_rides_start_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ride.
+        required: true
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+  /api/v1/rides/near/:
+    get:
+      operationId: v1_rides_near_retrieve
+      description: Search open rides whose origin is within radius_km of (lat, lng).
+      tags:
+      - rides
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+          description: ''
+  /api/v1/users/{user_id}/:
+    get:
+      operationId: v1_users_retrieve
+      description: |-
+        Trust profile of another participant, reachable from a ride, request or booking.
+
+        Only members with an account can read it, and it never carries contact
+        details, identity documents or wallet data. Review comments are returned to
+        the member themselves and to people who shared a booking with them.
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublicProfile'
+          description: ''
+  /api/v1/users/interest-tags/:
+    get:
+      operationId: v1_users_interest_tags_list
+      description: The personal interest taxonomy members pick from.
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterestTag'
+          description: ''
+  /api/v1/users/me/:
+    get:
+      operationId: v1_users_me_retrieve
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_users_me_update
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_users_me_partial_update
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/me/avatar/confirm-upload/:
+    post:
+      operationId: v1_users_me_avatar_confirm_upload_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvatarConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AvatarConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AvatarConfirm'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/me/avatar/download-url/:
+    get:
+      operationId: v1_users_me_avatar_download_url_retrieve
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvatarDownload'
+          description: ''
+  /api/v1/users/me/avatar/upload-url/:
+    post:
+      operationId: v1_users_me_avatar_upload_url_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvatarUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AvatarUploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AvatarUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvatarUploadResponse'
+          description: ''
+  /api/v1/users/me/become-driver/:
+    post:
+      operationId: v1_users_me_become_driver_create
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/vehicles/:
+    get:
+      operationId: v1_vehicles_list
+      description: Drivers manage their own vehicles. All writes go through services;
+        no hard deletes.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVehicleList'
+          description: ''
+    post:
+      operationId: v1_vehicles_create
+      description: Active drivers only; optional owned Carte Grise. Verification is
+        derived from document status.
+      tags:
+      - vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/vehicles/{id}/:
+    get:
+      operationId: v1_vehicles_retrieve
+      description: Drivers manage their own vehicles. All writes go through services;
+        no hard deletes.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this vehicle.
+        required: true
+      tags:
+      - vehicles
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+    put:
+      operationId: v1_vehicles_update
+      description: Atomic owner/active-driver update. is_active is editable; carte_grise=null
+        detaches it.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this vehicle.
+        required: true
+      tags:
+      - vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: v1_vehicles_partial_update
+      description: 'Atomic PATCH: validate ownership/type before any mutations. null
+        detaches; omission retains Carte Grise.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this vehicle.
+        required: true
+      tags:
+      - vehicles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicle'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/verification/documents/:
+    get:
+      operationId: v1_verification_documents_list
+      description: Documents are served through short-lived signed URLs only. Raw
+        keys never leave the API.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVerificationDocumentList'
+          description: ''
+  /api/v1/verification/documents/{id}/:
+    get:
+      operationId: v1_verification_documents_retrieve
+      description: Documents are served through short-lived signed URLs only. Raw
+        keys never leave the API.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this verification document.
+        required: true
+      tags:
+      - verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationDocument'
+          description: ''
+  /api/v1/verification/documents/{id}/confirm-upload/:
+    post:
+      operationId: v1_verification_documents_confirm_upload_create
+      description: Confirm only after S3 HEAD and bounded file-signature validation.
+        Idempotent; legal gate applies.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this verification document.
+        required: true
+      tags:
+      - verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationDocument'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/verification/documents/{id}/download-url/:
+    get:
+      operationId: v1_verification_documents_download_url_retrieve
+      description: Owner/staff only; returns a private GET URL valid for 300 seconds.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this verification document.
+        required: true
+      tags:
+      - verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/verification/documents/{id}/review/:
+    post:
+      operationId: v1_verification_documents_review_create
+      description: Staff only. APPROVE requires confirmed, storage-validated upload.
+        REJECT/REQUEST_MORE require a reason. CIN approval supersedes prior approved
+        CINs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this verification document.
+        required: true
+      tags:
+      - verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationDocument'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/verification/documents/{id}/revoke/:
+    post:
+      operationId: v1_verification_documents_revoke_create
+      description: Staff only. Revoke an APPROVED document with a reason; append audit
+        and recompute eligibility.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this verification document.
+        required: true
+      tags:
+      - verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationDocument'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/verification/documents/upload-url/:
+    post:
+      operationId: v1_verification_documents_upload_url_create
+      description: Declare PDF/JPEG/PNG MIME, matching filename and 1–10485760 byte
+        size. PUT with the declared Content-Type. Disabled until legal sign-off.
+      tags:
+      - verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/wallet/earnings/:
+    get:
+      operationId: v1_wallet_earnings_retrieve
+      description: 'A driver''s ride income from the ledger: fares paid, the platform
+        fee, and refunds.'
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/wallet/entries/:
+    get:
+      operationId: v1_wallet_entries_list
+      description: The authenticated user's ledger entries, newest first. Immutable,
+        read-only.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLedgerEntryList'
+          description: ''
+  /api/v1/wallet/me/:
+    get:
+      operationId: v1_wallet_me_retrieve
+      description: The authenticated user's wallet balance.
+      tags:
+      - wallet
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    ActionEnum:
+      enum:
+      - cancel
+      - complete
+      type: string
+      description: |-
+        * `cancel` - cancel
+        * `complete` - complete
+    AtmosphereEnum:
+      enum:
+      - MUSIC
+      - CONVERSATION
+      - QUIET
+      type: string
+      description: |-
+        * `MUSIC` - Music on
+        * `CONVERSATION` - Happy to chat
+        * `QUIET` - Quiet ride
+    AuditEntry:
+      type: object
+      description: 'A staff decision, safe to return to staff: actor identity, object
+        and decision only.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        object_type:
+          type: string
+        object_id:
+          type: string
+        reason:
+          type: string
+        metadata: {}
+        created_at:
+          type: string
+          format: date-time
+        actor_display_name:
+          type: string
+          readOnly: true
+      required:
+      - action
+      - actor_display_name
+      - created_at
+      - id
+      - metadata
+      - object_id
+      - object_type
+      - reason
+    AvatarConfirm:
+      type: object
+      properties:
+        upload_token:
+          type: string
+          maxLength: 2048
+      required:
+      - upload_token
+    AvatarDownload:
+      type: object
+      properties:
+        download_url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+      required:
+      - download_url
+      - expires_in
+    AvatarUploadRequest:
+      type: object
+      properties:
+        file_name:
+          type: string
+          maxLength: 255
+        content_type:
+          $ref: '#/components/schemas/AvatarUploadRequestContentTypeEnum'
+        size_bytes:
+          type: integer
+          maximum: 5242880
+          minimum: 1
+      required:
+      - content_type
+      - file_name
+      - size_bytes
+    AvatarUploadRequestContentTypeEnum:
+      enum:
+      - image/jpeg
+      - image/png
+      type: string
+      description: |-
+        * `image/jpeg` - image/jpeg
+        * `image/png` - image/png
+    AvatarUploadResponse:
+      type: object
+      properties:
+        upload_url:
+          type: string
+          format: uri
+        upload_token:
+          type: string
+      required:
+      - upload_token
+      - upload_url
+    BlankEnum:
+      enum:
+      - ''
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        ride:
+          type: string
+          format: uuid
+        passenger:
+          type: string
+          format: uuid
+          readOnly: true
+        seats:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        pickup_point:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        dropoff_point:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingStatusEnum'
+          readOnly: true
+        fare_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          readOnly: true
+        subsidy_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          readOnly: true
+          nullable: true
+        voucher_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          readOnly: true
+          nullable: true
+        paid_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          readOnly: true
+          nullable: true
+        refunded_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          readOnly: true
+          nullable: true
+        passenger_summary:
+          allOf:
+          - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+      required:
+      - dropoff_point
+      - fare_amount
+      - id
+      - paid_amount
+      - passenger
+      - passenger_summary
+      - pickup_point
+      - refunded_amount
+      - ride
+      - status
+      - subsidy_amount
+      - voucher_amount
+    BookingStatusEnum:
+      enum:
+      - REQUESTED
+      - ACCEPTED
+      - CONFIRMED
+      - COMPLETED
+      - REJECTED
+      - CANCELLED_BY_PASSENGER
+      - CANCELLED_BY_DRIVER
+      - NO_SHOW
+      type: string
+      description: |-
+        * `REQUESTED` - Requested
+        * `ACCEPTED` - Accepted
+        * `CONFIRMED` - Confirmed
+        * `COMPLETED` - Completed
+        * `REJECTED` - Rejected
+        * `CANCELLED_BY_PASSENGER` - Cancelled by passenger
+        * `CANCELLED_BY_DRIVER` - Cancelled by driver
+        * `NO_SHOW` - No show
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+        website:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        logo_key:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - owner
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        brand:
+          type: string
+          format: uuid
+        brand_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        discount_per_seat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        budget:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        spent:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          readOnly: true
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+        paused_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        audience_interests:
+          type: array
+          items:
+            type: string
+          description: Interest slugs this offer targets. Empty targets every member.
+        promotion_title:
+          type: string
+          maxLength: 120
+        promotion_body:
+          type: string
+          maxLength: 300
+        promotion_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - balance
+      - brand
+      - brand_name
+      - budget
+      - created_at
+      - discount_per_seat
+      - id
+      - name
+      - paused_at
+      - spent
+    CampaignAnalytics:
+      type: object
+      properties:
+        campaign:
+          type: string
+          format: uuid
+        impressions:
+          type: integer
+        engagements:
+          type: integer
+        redemptions:
+          type: integer
+        promo_codes_issued:
+          type: integer
+        subsidy_spend:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        promo_redemption_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        promo_value_outstanding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        budget:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        budget_remaining:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        audience_tags:
+          type: integer
+      required:
+      - audience_tags
+      - balance
+      - budget
+      - budget_remaining
+      - campaign
+      - engagements
+      - impressions
+      - promo_codes_issued
+      - promo_redemption_value
+      - promo_value_outstanding
+      - redemptions
+      - subsidy_spend
+    CampaignEventInput:
+      type: object
+      description: Client-reported visibility only. The dedupe key and the ride come
+        from the URL.
+      properties:
+        kind:
+          $ref: '#/components/schemas/CampaignEventInputKindEnum'
+      required:
+      - kind
+    CampaignEventInputKindEnum:
+      enum:
+      - IMPRESSION
+      - ENGAGEMENT
+      type: string
+      description: |-
+        * `IMPRESSION` - IMPRESSION
+        * `ENGAGEMENT` - ENGAGEMENT
+    CampaignFund:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,9}(?:\.\d{0,3})?$
+        idempotency_key:
+          type: string
+          maxLength: 60
+      required:
+      - amount
+    CancellationQuote:
+      type: object
+      properties:
+        action:
+          type: string
+        allowed:
+          type: boolean
+        status:
+          type: string
+        refund:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        subsidy_returned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        voucher_returned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        seats_released:
+          type: integer
+      required:
+      - action
+      - allowed
+      - refund
+      - seats_released
+      - status
+      - subsidy_returned
+      - voucher_returned
+    ChannelEnum:
+      enum:
+      - EMAIL
+      - PHONE
+      type: string
+      description: |-
+        * `EMAIL` - EMAIL
+        * `PHONE` - PHONE
+    CompleteRegistration:
+      type: object
+      description: Name, password and role collected after the contact proof succeeds.
+      properties:
+        full_name:
+          type: string
+          maxLength: 150
+          minLength: 2
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        role:
+          $ref: '#/components/schemas/CompleteRegistrationRoleEnum'
+      required:
+      - full_name
+      - password
+      - role
+    CompleteRegistrationRoleEnum:
+      enum:
+      - PASSENGER
+      - DRIVER
+      type: string
+      description: |-
+        * `PASSENGER` - PASSENGER
+        * `DRIVER` - DRIVER
+    ContactCheck:
+      type: object
+      description: One field for either an email address or a Tunisian phone number.
+      properties:
+        contact:
+          type: string
+          maxLength: 254
+      required:
+      - contact
+    ContactCheckResult:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/ChannelEnum'
+        exists:
+          type: boolean
+        has_password:
+          type: boolean
+      required:
+      - channel
+      - exists
+      - has_password
+    ContactRequest:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/ChannelEnum'
+        contact:
+          type: string
+          maxLength: 254
+      required:
+      - channel
+      - contact
+    ContactVerify:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/ChannelEnum'
+        contact:
+          type: string
+          maxLength: 254
+        code:
+          type: string
+          pattern: ^[0-9]{6}$
+      required:
+      - channel
+      - code
+      - contact
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking:
+          type: string
+          format: uuid
+          readOnly: true
+        participants:
+          type: array
+          items: {}
+          readOnly: true
+        booking_status:
+          type: string
+          readOnly: true
+        can_send:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - booking
+      - booking_status
+      - can_send
+      - created_at
+      - id
+      - participants
+    Detail:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    DeviceRegistration:
+      type: object
+      properties:
+        token:
+          type: string
+          maxLength: 255
+        platform:
+          type: string
+          default: ANDROID
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          default: FCM
+      required:
+      - token
+    DeviceToken:
+      type: object
+      properties:
+        token:
+          type: string
+          maxLength: 255
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        provider:
+          $ref: '#/components/schemas/ProviderEnum'
+      required:
+      - token
+    DocTypeEnum:
+      enum:
+      - CIN
+      - CARTE_GRISE
+      type: string
+      description: |-
+        * `CIN` - National ID (CIN)
+        * `CARTE_GRISE` - Vehicle registration (Carte Grise)
+    DownloadResponse:
+      type: object
+      properties:
+        download_url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+      required:
+      - download_url
+      - expires_in
+    EmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+      - email
+    EmailVerify:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        code:
+          type: string
+          pattern: ^[0-9]{6}$
+      required:
+      - code
+      - email
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    FundingIntent:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,9}(?:\.\d{0,3})?$
+      required:
+      - amount
+    FundingResult:
+      type: object
+      properties:
+        intent:
+          type: string
+          format: uuid
+        status:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,9}(?:\.\d{0,3})?$
+        payment_url:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - amount
+      - intent
+      - status
+    GatewayEnum:
+      enum:
+      - FLOUCI
+      - CASH
+      type: string
+      description: |-
+        * `FLOUCI` - Flouci
+        * `CASH` - Cash
+    IncentiveAward:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/IncentiveAwardKindEnum'
+        campaign_name:
+          type: string
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        status:
+          type: string
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+        expires_at:
+          type: string
+          format: date-time
+        redeemed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - campaign_name
+      - code
+      - created_at
+      - expires_at
+      - id
+      - kind
+      - status
+    IncentiveAwardKindEnum:
+      enum:
+      - WELCOME_CREDIT
+      - DRIVER_FUEL
+      type: string
+      description: |-
+        * `WELCOME_CREDIT` - Passenger welcome credit
+        * `DRIVER_FUEL` - Driver fuel reward
+    IncentiveCampaign:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        kind:
+          $ref: '#/components/schemas/IncentiveAwardKindEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        is_active:
+          type: boolean
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        award_validity_days:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        balance:
+          type: string
+          readOnly: true
+        awards_issued:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - awards_issued
+      - balance
+      - created_at
+      - id
+      - kind
+      - name
+    Interest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        origin:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        destination:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        origin_label:
+          type: string
+          maxLength: 150
+        destination_label:
+          type: string
+          maxLength: 150
+        earliest_departure:
+          type: string
+          format: date-time
+        latest_departure:
+          type: string
+          format: date-time
+        seats:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        is_active:
+          type: boolean
+          readOnly: true
+      required:
+      - destination
+      - earliest_departure
+      - id
+      - is_active
+      - latest_departure
+      - origin
+    InterestTag:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        labels:
+          type: object
+          properties:
+            en:
+              type: string
+            fr:
+              type: string
+            ar:
+              type: string
+          readOnly: true
+      required:
+      - labels
+      - slug
+    LedgerEntry:
+      type: object
+      description: Read-only view of the user's ledger history.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          type: string
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        booking:
+          type: string
+          nullable: true
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - booking
+      - created_at
+      - description
+      - id
+      - kind
+      - reference
+    Logout:
+      type: object
+      properties:
+        refresh:
+          type: string
+      required:
+      - refresh
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        conversation:
+          type: string
+          format: uuid
+          readOnly: true
+        sender:
+          type: string
+          format: uuid
+          readOnly: true
+        body:
+          type: string
+          maxLength: 2000
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - conversation
+      - created_at
+      - id
+      - sender
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        payload:
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - created_at
+      - id
+      - kind
+      - payload
+      - read_at
+      - title
+    NotificationCount:
+      type: object
+      properties:
+        count:
+          type: integer
+          readOnly: true
+      required:
+      - count
+    NotificationPreference:
+      type: object
+      properties:
+        push_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        promotions_enabled:
+          type: boolean
+        capabilities:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+      required:
+      - capabilities
+    NotificationReadAll:
+      type: object
+      properties:
+        updated:
+          type: integer
+          readOnly: true
+      required:
+      - updated
+    OtpRequest:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+          pattern: ^\+216[0-9]{8}$
+      required:
+      - phone_number
+    OtpVerify:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+          pattern: ^\+216[0-9]{8}$
+        code:
+          type: string
+          pattern: ^[0-9]{6}$
+      required:
+      - code
+      - phone_number
+    PaginatedBookingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    PaginatedBrandList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Brand'
+    PaginatedCampaignList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Campaign'
+    PaginatedConversationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+    PaginatedIncentiveAwardList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncentiveAward'
+    PaginatedIncentiveCampaignList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncentiveCampaign'
+    PaginatedInterestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interest'
+    PaginatedLedgerEntryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEntry'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedPaymentIntentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentIntent'
+    PaginatedPromoCodeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromoCode'
+    PaginatedRatingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rating'
+    PaginatedReportList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
+    PaginatedRideList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ride'
+    PaginatedScoredInterestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoredInterest'
+    PaginatedScoredRideList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoredRide'
+    PaginatedSponsoredRideList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsoredRide'
+    PaginatedVehicleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vehicle'
+    PaginatedVerificationDocumentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationDocument'
+    PaginatedVoucherList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Voucher'
+    PasswordLogin:
+      type: object
+      description: One field for either an email address or a Tunisian phone number.
+      properties:
+        contact:
+          type: string
+          maxLength: 254
+        password:
+          type: string
+          maxLength: 128
+      required:
+      - contact
+      - password
+    PatchedBrand:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+        website:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        logo_key:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedCampaign:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        brand:
+          type: string
+          format: uuid
+        brand_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        discount_per_seat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        budget:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        spent:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          readOnly: true
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+        paused_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        audience_interests:
+          type: array
+          items:
+            type: string
+          description: Interest slugs this offer targets. Empty targets every member.
+        promotion_title:
+          type: string
+          maxLength: 120
+        promotion_body:
+          type: string
+          maxLength: 300
+        promotion_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedIncentiveCampaign:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        kind:
+          $ref: '#/components/schemas/IncentiveAwardKindEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        is_active:
+          type: boolean
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        award_validity_days:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        balance:
+          type: string
+          readOnly: true
+        awards_issued:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedNotificationPreference:
+      type: object
+      properties:
+        push_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        promotions_enabled:
+          type: boolean
+        capabilities:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+    PatchedRide:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        driver:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        origin:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        destination:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        origin_label:
+          type: string
+          maxLength: 150
+        destination_label:
+          type: string
+          maxLength: 150
+        departure_at:
+          type: string
+          format: date-time
+        seats_total:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        seats_available:
+          type: integer
+          readOnly: true
+        price_per_seat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        notes:
+          type: string
+          maxLength: 500
+        atmosphere:
+          oneOf:
+          - $ref: '#/components/schemas/AtmosphereEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        preferred_interests:
+          type: array
+          items:
+            type: string
+          description: Interest slugs the driver would like to share the ride with
+        status:
+          allOf:
+          - $ref: '#/components/schemas/RideStatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        distance_km:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        driver_summary:
+          allOf:
+          - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        vehicle_summary:
+          allOf:
+          - $ref: '#/components/schemas/VehicleSummary'
+          readOnly: true
+        sponsorship:
+          allOf:
+          - $ref: '#/components/schemas/SponsorSummary'
+          nullable: true
+          readOnly: true
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+          nullable: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone_verified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        email_verified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/UserRoleEnum'
+          readOnly: true
+        preferred_language:
+          $ref: '#/components/schemas/PreferredLanguageEnum'
+        is_verified:
+          type: boolean
+          readOnly: true
+        profile:
+          $ref: '#/components/schemas/Profile'
+        onboarding_complete:
+          type: boolean
+          readOnly: true
+    PatchedVehicle:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        make:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          maxLength: 30
+        plate_number:
+          type: string
+          maxLength: 20
+        seats:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        carte_grise:
+          type: string
+          format: uuid
+          nullable: true
+        is_active:
+          type: boolean
+        is_verified:
+          type: boolean
+          description: A vehicle is verified only through an approved Carte Grise.
+            Derived, never stored.
+          readOnly: true
+        is_bookable:
+          type: boolean
+          readOnly: true
+    PaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/PaymentIntentKindEnum'
+        gateway:
+          $ref: '#/components/schemas/GatewayEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,9}(?:\.\d{0,3})?$
+        currency:
+          type: string
+          maxLength: 3
+        status:
+          $ref: '#/components/schemas/PaymentIntentStatusEnum'
+        gateway_reference:
+          type: string
+          maxLength: 120
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - gateway
+      - id
+    PaymentIntentKindEnum:
+      enum:
+      - TOPUP
+      - CAMPAIGN_FUNDING
+      type: string
+      description: |-
+        * `TOPUP` - Wallet topup
+        * `CAMPAIGN_FUNDING` - Brand campaign funding
+    PaymentIntentStatusEnum:
+      enum:
+      - PENDING
+      - PAID
+      - FAILED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PAID` - Paid
+        * `FAILED` - Failed
+        * `CANCELLED` - Cancelled
+    PaymentQuote:
+      type: object
+      properties:
+        fare:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        subsidy:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        voucher:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        voucher_code:
+          type: string
+          nullable: true
+        out_of_pocket:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,9}(?:\.\d{0,3})?$
+        sufficient:
+          type: boolean
+      required:
+      - balance
+      - fare
+      - out_of_pocket
+      - subsidy
+      - sufficient
+      - voucher
+      - voucher_code
+    PlatformEnum:
+      enum:
+      - IOS
+      - ANDROID
+      - WEB
+      type: string
+      description: |-
+        * `IOS` - iOS
+        * `ANDROID` - Android
+        * `WEB` - Web
+    PreferredLanguageEnum:
+      enum:
+      - ar
+      - fr
+      - en
+      type: string
+      description: |-
+        * `ar` - Arabic
+        * `fr` - French
+        * `en` - English
+    Profile:
+      type: object
+      properties:
+        full_name:
+          type: string
+          maxLength: 150
+        avatar_key:
+          type: string
+          readOnly: true
+        bio:
+          type: string
+          maxLength: 500
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          readOnly: true
+        interests:
+          type: array
+          items:
+            type: string
+      required:
+      - avatar_key
+      - average_rating
+    PromoCode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        redeemed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - amount
+      - code
+      - created_at
+      - expires_at
+      - id
+      - redeemed_at
+    PromoCodeCreate:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - amount
+    ProviderEnum:
+      enum:
+      - FCM
+      - EXPO
+      type: string
+      description: |-
+        * `FCM` - Firebase
+        * `EXPO` - Expo
+    Rating:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking:
+          type: string
+          format: uuid
+          readOnly: true
+        rater:
+          type: string
+          format: uuid
+          readOnly: true
+        ratee:
+          type: string
+          format: uuid
+          readOnly: true
+        score:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        comment:
+          type: string
+          maxLength: 500
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - booking
+      - created_at
+      - id
+      - ratee
+      - rater
+      - score
+    ReasonEnum:
+      enum:
+      - HARASSMENT
+      - FRAUD
+      - SAFETY
+      - SPAM
+      - OTHER
+      type: string
+      description: |-
+        * `HARASSMENT` - Harassment
+        * `FRAUD` - Fraud
+        * `SAFETY` - Safety
+        * `SPAM` - Spam
+        * `OTHER` - Other
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        reporter:
+          type: string
+          format: uuid
+          readOnly: true
+        target_type:
+          $ref: '#/components/schemas/TargetTypeEnum'
+        target_id:
+          type: string
+          maxLength: 64
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        details:
+          type: string
+          maxLength: 2000
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReportStatusEnum'
+          readOnly: true
+          default: OPEN
+        handled_by:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        handled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - handled_at
+      - handled_by
+      - id
+      - reason
+      - reporter
+      - status
+      - target_id
+      - target_type
+    ReportStatusEnum:
+      enum:
+      - OPEN
+      - DISMISSED
+      - ACTIONED
+      type: string
+      description: |-
+        * `OPEN` - Open
+        * `DISMISSED` - Dismissed
+        * `ACTIONED` - Actioned
+    ReviewRequest:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/ReviewRequestDecisionEnum'
+        reason:
+          type: string
+          default: ''
+          maxLength: 4000
+      required:
+      - decision
+    ReviewRequestDecisionEnum:
+      enum:
+      - APPROVE
+      - REJECT
+      - REQUEST_MORE
+      type: string
+      description: |-
+        * `APPROVE` - APPROVE
+        * `REJECT` - REJECT
+        * `REQUEST_MORE` - REQUEST_MORE
+    RevokeRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 4000
+      required:
+      - reason
+    Ride:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        driver:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        origin:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        destination:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        origin_label:
+          type: string
+          maxLength: 150
+        destination_label:
+          type: string
+          maxLength: 150
+        departure_at:
+          type: string
+          format: date-time
+        seats_total:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        seats_available:
+          type: integer
+          readOnly: true
+        price_per_seat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        notes:
+          type: string
+          maxLength: 500
+        atmosphere:
+          oneOf:
+          - $ref: '#/components/schemas/AtmosphereEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        preferred_interests:
+          type: array
+          items:
+            type: string
+          description: Interest slugs the driver would like to share the ride with
+        status:
+          allOf:
+          - $ref: '#/components/schemas/RideStatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        distance_km:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        driver_summary:
+          allOf:
+          - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        vehicle_summary:
+          allOf:
+          - $ref: '#/components/schemas/VehicleSummary'
+          readOnly: true
+        sponsorship:
+          allOf:
+          - $ref: '#/components/schemas/SponsorSummary'
+          nullable: true
+          readOnly: true
+      required:
+      - cancelled_at
+      - completed_at
+      - departure_at
+      - destination
+      - destination_label
+      - distance_km
+      - driver
+      - driver_summary
+      - id
+      - origin
+      - origin_label
+      - price_per_seat
+      - seats_available
+      - seats_total
+      - sponsorship
+      - started_at
+      - status
+      - vehicle
+      - vehicle_summary
+    RideCancellationQuote:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        status:
+          type: string
+        bookings_cancelled:
+          type: integer
+        paid_bookings:
+          type: integer
+        total_refund:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/RideRefundLine'
+      required:
+      - allowed
+      - bookings
+      - bookings_cancelled
+      - paid_bookings
+      - status
+      - total_refund
+    RideOverrideInput:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ActionEnum'
+        reason:
+          type: string
+          maxLength: 200
+      required:
+      - action
+    RideOverrideResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+      required:
+      - id
+      - status
+    RideRefundLine:
+      type: object
+      properties:
+        booking:
+          type: string
+          format: uuid
+        status:
+          type: string
+        refund:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        subsidy_returned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        voucher_returned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        seats_released:
+          type: integer
+      required:
+      - booking
+      - refund
+      - seats_released
+      - status
+      - subsidy_returned
+      - voucher_returned
+    RideStatusEnum:
+      enum:
+      - OPEN
+      - FULL
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `OPEN` - Open for booking
+        * `FULL` - Fully booked
+        * `IN_PROGRESS` - In progress
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    ScoredInterest:
+      type: object
+      description: Interest output plus the match score (0..100) computed against
+        a ride.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        origin:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        destination:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        origin_label:
+          type: string
+          maxLength: 150
+        destination_label:
+          type: string
+          maxLength: 150
+        earliest_departure:
+          type: string
+          format: date-time
+        latest_departure:
+          type: string
+          format: date-time
+        seats:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        is_active:
+          type: boolean
+          readOnly: true
+        score:
+          type: number
+          format: double
+          readOnly: true
+      required:
+      - destination
+      - earliest_departure
+      - id
+      - is_active
+      - latest_departure
+      - origin
+      - score
+    ScoredRide:
+      type: object
+      description: Ride output plus the match score (0..100) computed against an interest.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        driver:
+          type: string
+          format: uuid
+          readOnly: true
+        vehicle:
+          type: string
+          format: uuid
+        origin:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        destination:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        origin_label:
+          type: string
+          maxLength: 150
+        destination_label:
+          type: string
+          maxLength: 150
+        departure_at:
+          type: string
+          format: date-time
+        seats_total:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        seats_available:
+          type: integer
+          readOnly: true
+        price_per_seat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        notes:
+          type: string
+          maxLength: 500
+        atmosphere:
+          oneOf:
+          - $ref: '#/components/schemas/AtmosphereEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        preferred_interests:
+          type: array
+          items:
+            type: string
+          description: Interest slugs the driver would like to share the ride with
+        status:
+          allOf:
+          - $ref: '#/components/schemas/RideStatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        distance_km:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        driver_summary:
+          allOf:
+          - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        vehicle_summary:
+          allOf:
+          - $ref: '#/components/schemas/VehicleSummary'
+          readOnly: true
+        sponsorship:
+          allOf:
+          - $ref: '#/components/schemas/SponsorSummary'
+          nullable: true
+          readOnly: true
+        score:
+          type: number
+          format: double
+          readOnly: true
+      required:
+      - cancelled_at
+      - completed_at
+      - departure_at
+      - destination
+      - destination_label
+      - distance_km
+      - driver
+      - driver_summary
+      - id
+      - origin
+      - origin_label
+      - price_per_seat
+      - score
+      - seats_available
+      - seats_total
+      - sponsorship
+      - started_at
+      - status
+      - vehicle
+      - vehicle_summary
+    SponsorSummary:
+      type: object
+      description: 'Labeled sponsored content. Aggregate only: no member data reaches
+        the brand.'
+      properties:
+        campaign:
+          type: string
+          format: uuid
+        brand_name:
+          type: string
+        discount_per_seat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        label:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        url:
+          type: string
+        active:
+          type: boolean
+      required:
+      - active
+      - body
+      - brand_name
+      - campaign
+      - discount_per_seat
+      - label
+      - title
+      - url
+    SponsoredRide:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        campaign:
+          type: string
+          format: uuid
+        ride:
+          type: string
+          format: uuid
+        ride_label:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - campaign
+      - created_at
+      - id
+      - ride
+      - ride_label
+    SponsoredRideCreate:
+      type: object
+      properties:
+        ride:
+          type: string
+          format: uuid
+      required:
+      - ride
+    TargetTypeEnum:
+      enum:
+      - USER
+      - RIDE
+      - VEHICLE
+      - MESSAGE
+      type: string
+      description: |-
+        * `USER` - User
+        * `RIDE` - Ride
+        * `VEHICLE` - Vehicle
+        * `MESSAGE` - Message
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    Transition:
+      type: object
+      properties:
+        expected_out_of_pocket:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          description: 'Required for confirm: the out_of_pocket the passenger approved
+            from payment-quote'
+    UploadRequest:
+      type: object
+      properties:
+        doc_type:
+          $ref: '#/components/schemas/DocTypeEnum'
+        file_name:
+          type: string
+          maxLength: 255
+        content_type:
+          $ref: '#/components/schemas/UploadRequestContentTypeEnum'
+        size_bytes:
+          type: integer
+          maximum: 10485760
+          minimum: 1
+      required:
+      - content_type
+      - doc_type
+      - file_name
+      - size_bytes
+    UploadRequestContentTypeEnum:
+      enum:
+      - application/pdf
+      - image/jpeg
+      - image/png
+      type: string
+      description: |-
+        * `application/pdf` - application/pdf
+        * `image/jpeg` - image/jpeg
+        * `image/png` - image/png
+    UploadResponse:
+      type: object
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        upload_url:
+          type: string
+          format: uri
+      required:
+      - document_id
+      - upload_url
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+          nullable: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone_verified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        email_verified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/UserRoleEnum'
+          readOnly: true
+        preferred_language:
+          $ref: '#/components/schemas/PreferredLanguageEnum'
+        is_verified:
+          type: boolean
+          readOnly: true
+        profile:
+          $ref: '#/components/schemas/Profile'
+        onboarding_complete:
+          type: boolean
+          readOnly: true
+      required:
+      - email
+      - email_verified_at
+      - id
+      - is_verified
+      - onboarding_complete
+      - phone_number
+      - phone_verified_at
+      - role
+    UserPublicProfile:
+      type: object
+      description: Participant-facing profile. Deliberately has no contact, document
+        or wallet fields.
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        bio:
+          type: string
+        member_since:
+          type: string
+          format: date-time
+        is_driver:
+          type: boolean
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        review_count:
+          type: integer
+        completed_trips:
+          type: integer
+        shared_interests:
+          type: array
+          items:
+            type: string
+            pattern: ^[-a-zA-Z0-9_]+$
+        reviews_visible:
+          type: boolean
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPublicReview'
+        is_self:
+          type: boolean
+      required:
+      - average_rating
+      - bio
+      - completed_trips
+      - display_name
+      - id
+      - is_driver
+      - is_self
+      - member_since
+      - review_count
+      - reviews
+      - reviews_visible
+      - shared_interests
+    UserPublicReview:
+      type: object
+      properties:
+        score:
+          type: integer
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        rater_display_name:
+          type: string
+      required:
+      - comment
+      - created_at
+      - rater_display_name
+      - score
+    UserRoleEnum:
+      enum:
+      - PASSENGER
+      - DRIVER
+      - BRAND
+      type: string
+      description: |-
+        * `PASSENGER` - Passenger
+        * `DRIVER` - Driver
+        * `BRAND` - Brand
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        completed_trips:
+          type: integer
+        shared_interests:
+          type: array
+          items:
+            type: string
+            pattern: ^[-a-zA-Z0-9_]+$
+          description: Interest slugs this member shares with you; empty for yourself
+      required:
+      - average_rating
+      - completed_trips
+      - display_name
+      - id
+      - shared_interests
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        make:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          maxLength: 30
+        plate_number:
+          type: string
+          maxLength: 20
+        seats:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        carte_grise:
+          type: string
+          format: uuid
+          nullable: true
+        is_active:
+          type: boolean
+        is_verified:
+          type: boolean
+          description: A vehicle is verified only through an approved Carte Grise.
+            Derived, never stored.
+          readOnly: true
+        is_bookable:
+          type: boolean
+          readOnly: true
+      required:
+      - id
+      - is_bookable
+      - is_verified
+      - make
+      - model
+      - plate_number
+      - seats
+    VehicleSummary:
+      type: object
+      properties:
+        make:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          maxLength: 30
+        seats:
+          type: integer
+          maximum: 32767
+          minimum: 0
+      required:
+      - make
+      - model
+      - seats
+    VerificationDocument:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doc_type:
+          allOf:
+          - $ref: '#/components/schemas/DocTypeEnum'
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        size_bytes:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/VerificationDocumentStatusEnum'
+          readOnly: true
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        rejection_reason:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationReview'
+          readOnly: true
+      required:
+      - content_type
+      - created_at
+      - doc_type
+      - history
+      - id
+      - rejection_reason
+      - reviewed_at
+      - size_bytes
+      - status
+      - uploaded_at
+    VerificationDocumentStatusEnum:
+      enum:
+      - PENDING
+      - APPROVED
+      - REJECTED
+      - NEEDS_MORE_DOCUMENTS
+      - SUPERSEDED
+      type: string
+      description: |-
+        * `PENDING` - Pending review
+        * `APPROVED` - Approved
+        * `REJECTED` - Rejected
+        * `NEEDS_MORE_DOCUMENTS` - Needs more documents
+        * `SUPERSEDED` - Superseded
+    VerificationReview:
+      type: object
+      properties:
+        actor:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/VerificationReviewDecisionEnum'
+          readOnly: true
+        reason:
+          type: string
+          readOnly: true
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor
+      - decision
+      - reason
+      - timestamp
+    VerificationReviewDecisionEnum:
+      enum:
+      - APPROVE
+      - REJECT
+      - REQUEST_MORE
+      - SUPERSEDE
+      - REVOKE
+      type: string
+      description: |-
+        * `APPROVE` - Approve
+        * `REJECT` - Reject
+        * `REQUEST_MORE` - Request more documents
+        * `SUPERSEDE` - Supersede
+        * `REVOKE` - Revoke
+    Voucher:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        redeemed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - code
+      - created_at
+      - id
+    VoucherClaim:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 40
+      required:
+      - code
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+servers:
+- url: http://localhost:8000
+  description: Local development
+tags:
+- name: auth
+  description: OTP login, token refresh, logout
+- name: users
+  description: Profile and driver upgrade
+- name: verification
+  description: CIN and Carte Grise documents
+- name: vehicles
+  description: Driver vehicles
+- name: rides
+  description: Published trips and nearby search
+- name: bookings
+  description: Booking lifecycle and transitions
+- name: interests
+  description: Passenger standing requests for future routes
+- name: matching
+  description: Geo-scored ride/interest matches
+- name: wallet
+  description: Balance and ledger history
+- name: payments
+  description: Topups and gateway webhooks

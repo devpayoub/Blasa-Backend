@@ -1,0 +1,41 @@
+digraph blasa_missing_features {
+  graph [rankdir=TB, nodesep=0.35, ranksep=0.65, bgcolor="white", fontname="Arial", labelloc=t, label="Blasa: proposed implementation prerequisites\nAdmin UI excluded; staff backend and brand portal retained"];
+  node [shape=box, style="rounded,filled", fillcolor="#edf3fa", color="#60748b", fontname="Arial", fontsize=11];
+  edge [color="#60748b", fontname="Arial", fontsize=9, type="proposed-prerequisite", state="proposed", confidence="medium", sourceRefs="backend/docs/missing-features-implementation-plan.md"];
+
+  integration [label="Phase 0 [proposed]\nReal API baseline + safe crediting", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:220-239;backend/apps/api/apps/payments/services.py:24-33"];
+  identity [label="Phase 1 [proposed]\nEmail/profile + driver verification", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:44-61;backend/apps/api/apps/users/services.py:7-21"];
+  lifecycle [label="Phase 2 [proposed]\nLifecycle + consent + refunds", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:63-99;backend/apps/api/apps/bookings/services.py:66-106"];
+  discovery [label="Phase 3 [proposed]\nRoute search + driver operations", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:63-97;backend/docs/prd-gap-analysis.md:203-216"];
+  interests [label="Phase 4 [proposed]\nPersonal interests + matching", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:101-129"];
+  money [label="Phase 5 [proposed]\nWallet + payments + rewards", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:131-149"];
+  communication [label="Phase 6 [proposed]\nInbox + reminders + gated chat", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:176-192;backend/apps/api/core/events.py:11-13"];
+  trust [label="Phase 7 [proposed]\nReviews + reports + staff backend", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:164-174;backend/docs/prd-gap-analysis.md:237-239"];
+  brands [label="Phase 8 [proposed]\nOwned brand portal + monetization", state="proposed", type="capability", confidence="high", sourceRefs="backend/docs/prd-gap-analysis.md:151-162;backend/apps/api/apps/brands/services.py:43-54"];
+  release [label="Phase 9 [proposed]\nReal business journeys + native QA", fillcolor="#e8f2e9", state="proposed", type="capability", confidence="medium", sourceRefs="backend/docs/missing-features-implementation-plan.md;.github/workflows/ci.yml:40-56;frontend/AGENTS.md"];
+  approvals [label="Unknown / validate before shipping\nRefund + consent policies\nLegal, bank, fuel, delivery providers", shape=diamond, style="dashed,filled", fillcolor="#fff2d9", color="#a78138", state="unknown", type="decision", confidence="unknown", sourceRefs="backend/docs/missing-features-implementation-plan.md;backend/docs/prd-gap-analysis.md:58-60;backend/docs/prd-gap-analysis.md:143-145"];
+
+  integration -> identity [label="requires real auth baseline"];
+  identity -> lifecycle [label="requires eligible users/vehicles"];
+  lifecycle -> discovery [label="requires states + scopes"];
+  identity -> interests [label="requires profile ownership"];
+  discovery -> interests [label="requires route eligibility"];
+  lifecycle -> money [label="requires authorized payment/refund"];
+  identity -> money [label="requires reward eligibility"];
+  identity -> communication [label="produces verification events"];
+  lifecycle -> communication [label="produces booking/ride events"];
+  interests -> communication [label="produces match events"];
+  money -> communication [label="produces payment/reward events"];
+  discovery -> trust [label="requires safe profiles"];
+  lifecycle -> trust [label="requires completed bookings"];
+  communication -> trust [label="requires restriction delivery"];
+  interests -> brands [label="requires permitted audiences"];
+  money -> brands [label="requires trusted funding"];
+  trust -> brands [label="requires audited owner controls"];
+  brands -> release [label="requires brand acceptance"];
+  trust -> release [label="requires trust acceptance"];
+  communication -> release [label="requires channel/native acceptance"];
+  approvals -> lifecycle [style=dashed, color="#a78138", label="policy gate", confidence="unknown"];
+  approvals -> money [style=dashed, color="#a78138", label="provider/legal gate", confidence="unknown"];
+  approvals -> release [style=dashed, color="#a78138", label="advertise only validated features", confidence="unknown"];
+}

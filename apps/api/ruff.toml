@@ -1,0 +1,21 @@
+# Ruff: keep the codebase honest without fighting the existing style.
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = [
+    "E9",   # syntax-level errors
+    "F",    # pyflakes: undefined names, unused imports, f-string bugs
+    "W",    # whitespace hygiene
+    "I",    # import sorting
+    "B",    # bugbear: real footguns
+]
+ignore = [
+    "E501",  # line length — formatter territory, not correctness
+    "B008",  # DRF default arguments in view signatures
+    "B904",  # raise-from style in except blocks (Django idiom varies)
+]
+
+[lint.per-file-ignores]
+"scripts/*" = ["E402"]  # scripts bootstrap Django before imports
+"apps/*/migrations/*" = ["E501", "W291"]

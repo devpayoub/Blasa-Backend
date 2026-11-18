@@ -135,18 +135,34 @@ connection retries instead of crashing the worker on boot.
 
 ## 3. Deploy
 
-The backend is **not a git repository yet** (only `frontend/` has `.git`). Render deploys from git, so:
+Both repos are on GitHub:
 
-```bash
-cd backend
-git init
-git add .
-git commit -m "Initial backend"
-git remote add origin <your-repo-url>
-git push -u origin main
-```
+- API — <https://github.com/devpayoub/Blasa-Backend>
+- App — <https://github.com/devpayoub/Blasa-Frontend>
 
-Then in Render: **New → Blueprint**, select the repo. It reads `render.yaml` at the repo root and prompts for the `sync: false` values.
+In Render: **New → Blueprint**, select `Blasa-Backend`. It reads `render.yaml` at
+the repo root and prompts for the `sync: false` values.
+
+The complete, copy-pasteable list of variables with the exact formats is in
+[`.env.production.example`](../.env.production.example). The `sync: false` ones
+are the only values you must supply yourself:
+
+| Variable | Where to get it |
+| --- | --- |
+| `DATABASE_URL` | Neon → Connection string, direct host, append `?sslmode=require` |
+| `REDIS_URL` | Upstash → Redis → TLS endpoint (`rediss://…`) |
+| `S3_BUCKET_PRIVATE` | The R2 bucket name you created |
+| `S3_ENDPOINT_URL` | `https://<account-id>.r2.cloudflarestorage.com` |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | R2 API token (Object Read & Write) |
+| `BREVO_API_KEY` | Brevo → SMTP & API → API keys (`xkeysib-…`) |
+| `DEFAULT_FROM_EMAIL` | Must be a **verified** Brevo sender |
+| `FLOUCI_*` | Flouci sandbox dashboard (optional) |
+| `SENTRY_DSN` | Sentry → project → Client Keys (optional) |
+
+Everything else (`DJANGO_SETTINGS_MODULE`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`,
+`DJANGO_SECRET_KEY`, `CELERY_TASK_ALWAYS_EAGER`, `S3_REGION`, `BREVO_SMS_SENDER`,
+`IDENTITY_DOCUMENT_UPLOADS_ENABLED`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_RATE`,
+`CORS_ALLOWED_ORIGINS`) is fixed in the blueprint and needs no input.
 
 Files added for this:
 - `render.yaml` — the blueprint (web service only, no Render DB/Redis)

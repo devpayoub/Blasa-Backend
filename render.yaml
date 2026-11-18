@@ -97,8 +97,9 @@ services:
       - key: FLOUCI_WEBHOOK_SECRET
         sync: false
 
-      # The Expo dev client is not a browser, so CORS mostly matters for the
-      # web build and Swagger. Add your Expo web origin here if you use it.
+      # The Expo dev client is not a browser, so CORS mostly matters for the web
+      # build and Swagger. Replace this with your deployed web origin
+      # (e.g. https://blasa.vercel.app) or the browser build cannot call the API.
       - key: CORS_ALLOWED_ORIGINS
         value: http://localhost:8081
 

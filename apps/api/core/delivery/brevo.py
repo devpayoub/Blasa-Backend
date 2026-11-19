@@ -25,6 +25,29 @@ SMS_ENDPOINT = "https://api.brevo.com/v3/transactionalSMS/sms"
 E164 = re.compile(r"^\+[1-9][0-9]{7,14}$")
 
 
+def _reason(exc: urllib.error.HTTPError) -> str:
+    """Extract Brevo's error code and message from a rejected request.
+
+    Brevo answers 4xx with {"code": "...", "message": "..."}. The request body we
+    sent is deliberately never logged — it carries OTP codes and message bodies —
+    but the provider's own explanation is what makes a bad sender or key
+    debuggable, so that part is surfaced.
+    """
+    try:
+        raw = exc.read(2048)
+    except Exception:  # noqa: BLE001 - the body is best-effort diagnostics
+        return ""
+    try:
+        data = json.loads(raw)
+    except (ValueError, TypeError):
+        return raw[:120].decode("utf-8", "replace")
+    if not isinstance(data, dict):
+        return raw[:120].decode("utf-8", "replace")
+    code = str(data.get("code") or "").strip()
+    message = str(data.get("message") or "").strip()
+    return f"{code}: {message}".strip(": ")[:200]
+
+
 def _post(url: str, payload: dict, *, timeout: int = 10) -> bool:
     api_key = getattr(settings, "BREVO_API_KEY", "")
     if not api_key:
@@ -43,7 +66,11 @@ def _post(url: str, payload: dict, *, timeout: int = 10) -> bool:
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return 200 <= response.status < 300
-    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
+    except urllib.error.HTTPError as exc:
+        # 400/401/403 is almost always a wrong key type or an unverified sender.
+        logger.warning("Brevo rejected the request: HTTP %s %s", exc.code, _reason(exc))
+        return False
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
         # Never log the payload: it carries OTP codes and message bodies.
         logger.warning("Brevo delivery failed: %s", type(exc).__name__)
         return False

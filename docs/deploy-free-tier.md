@@ -94,19 +94,46 @@ time out. The backend now ships a Brevo HTTP adapter:
 
 Setup:
 
-1. Create a Brevo account and verify a sender domain (or a single sender email).
-2. Create an API key under **SMTP & API → API keys** with email + SMS permissions.
+1. **Get the right credential.** Brevo has two, and they are not interchangeable:
+
+   | Dashboard location | Looks like | Used by |
+   | --- | --- | --- |
+   | **SMTP & API → API Keys** | `xkeysib-…` | **this backend** |
+   | **SMTP & API → SMTP** | `xsmtpsib-…` + `smtp-relay.brevo.com:587` | classic SMTP clients only |
+
+   The app posts to `api.brevo.com/v3` with an `api-key` header. An SMTP key is
+   rejected with `401 unauthorized: Key not found`, so use an **API key**.
+
+2. **Verify a sender — a domain is not required.** Go to **Senders, Domains &
+   IPs → Senders → Add a sender** and add a single address (a Gmail address is
+   fine). Brevo emails a confirmation link; click it and the address becomes an
+   active sender. `DEFAULT_FROM_EMAIL` must then be that **exact** address.
+   Without this, every send returns `400 sender not valid` and OTP email is
+   silently dropped.
+
 3. Set:
    ```
    BREVO_API_KEY=xkeysib-...
-   DEFAULT_FROM_EMAIL=Blasa <no-reply@yourdomain>
+   DEFAULT_FROM_EMAIL=Blasa <the-address-you-just-verified@gmail.com>
    BREVO_SMS_SENDER=Blasa
    ```
-4. Brevo's free plan is 300 emails/day and 300 SMS credits. SMS sender names
+
+4. Verify it before touching the app:
+   ```bash
+   python manage.py brevo_check                    # key + sender audit
+   python manage.py brevo_check --to you@mail.com  # send a real test email
+   python manage.py brevo_check --sms +21699000123 # send a real test SMS
+   ```
+
+5. Brevo's free plan is 300 emails/day and 300 SMS credits. SMS sender names
    must be pre-approved in the Brevo dashboard; Tunisia delivery is best-effort.
 
 With no API key the adapter is bypassed and OTP delivery stays a log-only no-op
 (the code is never written to logs, by design).
+
+> **Using a domain later.** Once you own one, verify the whole domain in Brevo
+> (adds DKIM/SPF records) instead of a single sender. Deliverability improves
+> markedly — mail from a free mailbox address often lands in spam.
 
 ### 2.5 Sentry — error monitoring
 
@@ -170,7 +197,10 @@ Files added for this:
 - `config/urls.py` — added `/healthz` for Render's health check
 - `settings/base.py` — added `whitenoise` middleware, `S3_REGION`, and made `CELERY_TASK_ALWAYS_EAGER` env-driven
 - `requirements/base.txt` — added `whitenoise`
-- `core/delivery/brevo.py` — Brevo email backend + transactional SMS adapter
+- `core/delivery/brevo.py` — Brevo email backend + transactional SMS adapter; a
+  rejected send now logs Brevo's own `code: message` (never the payload)
+- `core/management/commands/brevo_check.py` — `manage.py brevo_check` audits the
+  key type, the account and the verified-sender list
 - `core/observability.py` — Sentry init with credential scrubbing
 - `apps/auth/sms.py` — provider switch (`console` | `brevo`)
 - `apps/auth/views.py` — contact check, password login, registration completion

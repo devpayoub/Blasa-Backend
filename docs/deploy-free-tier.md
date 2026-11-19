@@ -199,6 +199,7 @@ Files added for this:
 - `render.yaml` — the blueprint (web service only, no Render DB/Redis)
 - `apps/api/Dockerfile` — prod image, installs `requirements/prod.txt`, runs non-root
 - `config/urls.py` — added `/healthz` for Render's health check
+- `core/views.py` — landing page at `/` (HTML for browsers, JSON for `Accept: application/json`); deliberately makes no database call
 - `settings/base.py` — added `whitenoise` middleware, `S3_REGION`, and made `CELERY_TASK_ALWAYS_EAGER` env-driven
 - `requirements/base.txt` — added `whitenoise`
 - `core/delivery/brevo.py` — Brevo email backend + transactional SMS adapter; a

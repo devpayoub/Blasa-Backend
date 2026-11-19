@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from core.views import api_root
+
 
 def healthz(_request):
     """Liveness probe for the platform. Deliberately touches no database."""
@@ -11,6 +13,7 @@ def healthz(_request):
 
 
 urlpatterns = [
+    path("", api_root, name="api-root"),
     path("healthz", healthz, name="healthz"),
     path("admin/", admin.site.urls),
     path("api/v1/", include("api.v1.urls")),

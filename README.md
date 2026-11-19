@@ -71,9 +71,11 @@ Implemented in `apps/api/core/exceptions.py`. Status → code mapping lives in
 
 1. `POST /api/v1/auth/contact/check/` — does this email/phone exist, and does it have a password?
 2. Existing user with password → `POST /api/v1/auth/password/login/`
-3. Otherwise → `POST /api/v1/auth/otp/request/` → `POST /api/v1/auth/otp/verify/` (6-digit code)
-4. New user → `POST /api/v1/auth/register/complete/` (full name, password, role)
-5. `POST /api/v1/verification/documents/` — drivers upload CIN + carte grise
+3. Otherwise, email (the primary path) → `POST /api/v1/auth/email/request/` → `POST /api/v1/auth/email/verify/`
+   (6-digit code; verifying a new address creates the account with `phone_number = NULL`)
+4. Phone instead → `POST /api/v1/auth/otp/request/` → `POST /api/v1/auth/otp/verify/`
+5. New user → `POST /api/v1/auth/register/complete/` (full name, password, role)
+6. `POST /api/v1/verification/documents/` — drivers upload CIN + carte grise
 
 Password is set exactly once (`has_usable_password()` guard). A `DRIVER` role does
 **not** bypass document verification, and public profiles never expose contact or
@@ -103,3 +105,26 @@ make test
 
 The suite covers auth/onboarding, verification gating, trip lifecycle, bookings,
 wallet invariants, chat permissions, notifications, and the brand portal.
+
+### Live end-to-end check (real database, real mail)
+
+`pytest` runs against the test settings with an empty database and a locmem mail
+backend, so it can never prove the real wiring works. `scripts/e2e_email_auth.py`
+does: it drives a **running** API over HTTP using the real `.env` — real
+database, real JWT signing, real Brevo delivery — and walks the whole email-only
+journey (check → code → verify → register → password login → refresh → logout).
+
+```bash
+make e2e                      # fully automated: seeds a known code, sends no mail
+make e2e-email EMAIL=you+e2e@gmail.com   # sends a real Brevo email, prompts for the code
+```
+
+`make e2e` needs Django, so it runs inside the `api` container. The email mode
+works with the standard library alone, so it can also point at the deployed API:
+
+```bash
+python apps/api/scripts/e2e_email_auth.py --mode email \
+  --base-url https://blasa-backend.onrender.com --email you+e2e@gmail.com
+```
+
+Every check prints PASS/FAIL and the exit code is non-zero if anything fails.

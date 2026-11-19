@@ -3,13 +3,20 @@ from pathlib import Path
 
 import environ
 
+from core.hosts import build_allowed_hosts
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 env = environ.Env()
 environ.Env.read_env(BASE_DIR.parent.parent / ".env", overwrite=False)
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+# Render injects the service's public hostname; core.hosts adds it so a service
+# rename cannot lock the API out of its own URL with DisallowedHost.
+ALLOWED_HOSTS = build_allowed_hosts(
+    env.list("DJANGO_ALLOWED_HOSTS", default=[]),
+    env("RENDER_EXTERNAL_HOSTNAME", default=""),
+)
 
 INSTALLED_APPS = [
     # Django

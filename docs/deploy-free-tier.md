@@ -225,13 +225,13 @@ These will each cost you an hour if you hit them cold:
 | Trap | Detail |
 | --- | --- |
 | **Wrong settings module** | `manage.py:3`, `celery.py:5` and `asgi.py:6` all default to `config.settings.dev`. If `DJANGO_SETTINGS_MODULE` is not set to `config.settings.prod`, you deploy with `DEBUG=True` and the dev database. |
-| **Boot crash without hosts** | `prod.py:35` raises `RuntimeError` at import if `DJANGO_ALLOWED_HOSTS` is empty. Set it to `blasa-api.onrender.com`. |
+| **Boot crash without hosts** | `prod.py:35` raises `RuntimeError` at import if `DJANGO_ALLOWED_HOSTS` is empty. Set it to `blasa-backend.onrender.com`. |
 | **512 MB is not much** | `--workers 4` from the compose file will be OOM-killed. The blueprint uses `--workers 1`. |
 | **The build context is the repo root** | Render ignores `dockerContext` for this service, so the Dockerfile sits at the repo root and its `COPY` paths are `apps/api/...`. A context-relative `COPY requirements/` fails with `"/requirements": not found`. The tell in the build log is `.dockerignore ... transferring context: 2B` — an empty ignore file means the context root is not `apps/api`. |
 | **Celery never runs** | No free worker. `CELERY_TASK_ALWAYS_EAGER=1` makes `.delay()` execute inline. Without it, `send_otp_sms.delay()` queues a message nobody consumes — and login silently breaks. |
 | **Identity uploads are off** | `prod.py:34` defaults `IDENTITY_DOCUMENT_UPLOADS_ENABLED` to `False`. `POST /verification/documents/upload-url/` returns 403. Expected — flip it only in a throwaway environment. |
 | **Admin CSS** | Django admin is the *only* place verification documents can be approved (`verification/admin.py`). Without static file serving it renders unstyled. `whitenoise` was added for this. |
-| **Flouci webhook needs a public URL** | Point it at `https://blasa-api.onrender.com/api/v1/payments/webhooks/flouci/`. The handler verifies HMAC-SHA256 against `FLOUCI_WEBHOOK_SECRET`, so the default `dev-flouci-webhook-secret` must be changed or webhooks will be rejected. |
+| **Flouci webhook needs a public URL** | Point it at `https://blasa-backend.onrender.com/api/v1/payments/webhooks/flouci/`. The handler verifies HMAC-SHA256 against `FLOUCI_WEBHOOK_SECRET`, so the default `dev-flouci-webhook-secret` must be changed or webhooks will be rejected. |
 | **Cold starts** | Free services sleep after 15 min. The first request takes ~60 s, and the Expo app's 15 s client timeout will fire first. Expect a failed first request after idle. |
 | **750 instance-hours/month** | Shared across the workspace. One always-on service burns ~730 hrs, so you have essentially one service. |
 

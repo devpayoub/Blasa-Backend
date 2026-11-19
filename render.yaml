@@ -40,9 +40,11 @@ services:
         value: "0"
       - key: PYTHONUNBUFFERED
         value: "1"
-      # prod.py raises RuntimeError at import if this is empty.
+      # prod.py raises RuntimeError at import if this ends up empty.
+      # base.py also appends RENDER_EXTERNAL_HOSTNAME automatically, so a
+      # service rename cannot lock the API out of its own hostname.
       - key: DJANGO_ALLOWED_HOSTS
-        value: blasa-api.onrender.com
+        value: blasa-backend.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
 
@@ -90,7 +92,7 @@ services:
         value: "0"
 
       # Flouci sandbox keys. The webhook needs a public URL, which Render gives
-      # you: https://blasa-api.onrender.com/api/v1/payments/webhooks/flouci/
+      # you: https://blasa-backend.onrender.com/api/v1/payments/webhooks/flouci/
       - key: FLOUCI_APP_KEY
         sync: false
       - key: FLOUCI_PRIVATE_KEY

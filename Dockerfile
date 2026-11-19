@@ -1,9 +1,18 @@
 # Production image for Render (and other Docker hosts).
 #
-# Differs from api.Dockerfile in two ways: it installs requirements/prod.txt
-# instead of dev.txt (no pytest/ruff on a 512 MB free instance), and it drops
-# root. GeoDjango needs GDAL/GEOS/PROJ at runtime, which is why the API cannot
-# be deployed on Render's native Python runtime — it must run as a container.
+# IMPORTANT — build context: Render builds with the REPOSITORY ROOT as the
+# Docker build context, not apps/api (it ignores dockerContext for this
+# service, which is why a context-relative COPY failed with
+# '"/requirements": not found'). Every COPY below is therefore repo-root
+# relative. Build it locally with:
+#
+#     docker build -t blasa-api .
+#
+# The development image is a separate file, infra/docker/api.Dockerfile, and is
+# only used by docker compose.
+#
+# GeoDjango needs GDAL/GEOS/PROJ at runtime, which is why the API cannot run on
+# Render's native Python runtime — it must be a container.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,10 +25,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY requirements/ requirements/
+# Requirements first so the pip layer survives application-code changes.
+COPY apps/api/requirements/ requirements/
 RUN pip install --no-cache-dir -r requirements/prod.txt
 
-COPY . .
+# Everything under apps/api becomes the app root: manage.py, config/, apps/.
+COPY apps/api/ ./
 
 # Render runs containers as an arbitrary uid; the app never writes to /app at
 # runtime except staticfiles, which collectstatic creates here.

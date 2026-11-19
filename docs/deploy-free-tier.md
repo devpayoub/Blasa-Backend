@@ -197,7 +197,9 @@ Everything else (`DJANGO_SETTINGS_MODULE`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS
 
 Files added for this:
 - `render.yaml` — the blueprint (web service only, no Render DB/Redis)
-- `apps/api/Dockerfile` — prod image, installs `requirements/prod.txt`, runs non-root
+- `Dockerfile` — prod image at the repo root (Render builds with the repo root as
+  context), installs `requirements/prod.txt`, runs non-root
+- `.dockerignore` — keeps the root context small and `.env*` out of image layers
 - `config/urls.py` — added `/healthz` for Render's health check
 - `core/views.py` — landing page at `/` (HTML for browsers, JSON for `Accept: application/json`); deliberately makes no database call
 - `settings/base.py` — added `whitenoise` middleware, `S3_REGION`, and made `CELERY_TASK_ALWAYS_EAGER` env-driven
@@ -225,6 +227,7 @@ These will each cost you an hour if you hit them cold:
 | **Wrong settings module** | `manage.py:3`, `celery.py:5` and `asgi.py:6` all default to `config.settings.dev`. If `DJANGO_SETTINGS_MODULE` is not set to `config.settings.prod`, you deploy with `DEBUG=True` and the dev database. |
 | **Boot crash without hosts** | `prod.py:35` raises `RuntimeError` at import if `DJANGO_ALLOWED_HOSTS` is empty. Set it to `blasa-api.onrender.com`. |
 | **512 MB is not much** | `--workers 4` from the compose file will be OOM-killed. The blueprint uses `--workers 1`. |
+| **The build context is the repo root** | Render ignores `dockerContext` for this service, so the Dockerfile sits at the repo root and its `COPY` paths are `apps/api/...`. A context-relative `COPY requirements/` fails with `"/requirements": not found`. The tell in the build log is `.dockerignore ... transferring context: 2B` — an empty ignore file means the context root is not `apps/api`. |
 | **Celery never runs** | No free worker. `CELERY_TASK_ALWAYS_EAGER=1` makes `.delay()` execute inline. Without it, `send_otp_sms.delay()` queues a message nobody consumes — and login silently breaks. |
 | **Identity uploads are off** | `prod.py:34` defaults `IDENTITY_DOCUMENT_UPLOADS_ENABLED` to `False`. `POST /verification/documents/upload-url/` returns 403. Expected — flip it only in a throwaway environment. |
 | **Admin CSS** | Django admin is the *only* place verification documents can be approved (`verification/admin.py`). Without static file serving it renders unstyled. `whitenoise` was added for this. |

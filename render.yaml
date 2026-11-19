@@ -15,11 +15,11 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    # Render resolves dockerfilePath RELATIVE TO dockerContext, so the Dockerfile
-    # must live inside apps/api. Pointing at ../infra/docker/ fails the build
-    # with "open Dockerfile: no such file or directory".
+    # Render builds with the REPOSITORY ROOT as the Docker context; it does not
+    # honour dockerContext for this service. The Dockerfile therefore lives at
+    # the root and its COPY paths are repo-root relative (apps/api/...).
     dockerfilePath: ./Dockerfile
-    dockerContext: ./apps/api
+    dockerContext: .
     healthCheckPath: /healthz
     # --workers 1: the free instance has 512 MB RAM. Four uvicorn workers plus
     # GDAL will be OOM-killed.

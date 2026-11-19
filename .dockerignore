@@ -1,0 +1,28 @@
+# Build context is the REPOSITORY ROOT (see Dockerfile). Keep the upload small
+# and make sure no secret ever reaches an image layer.
+
+# --- not needed at runtime -------------------------------------------------
+.git
+.github
+.workbuddy-ai/
+docs/
+infra/
+*.md
+Makefile
+
+# --- secrets ---------------------------------------------------------------
+.env
+.env.*
+
+# --- caches and artefacts --------------------------------------------------
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+**/*.log
+**/staticfiles/
+**/media/
+
+# Tokens captured by the API smoke-test script.
+apps/api/generated/_tokens.json

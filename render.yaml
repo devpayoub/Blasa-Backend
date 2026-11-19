@@ -15,7 +15,10 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    dockerfilePath: ./infra/docker/api.render.Dockerfile
+    # Render resolves dockerfilePath RELATIVE TO dockerContext, so the Dockerfile
+    # must live inside apps/api. Pointing at ../infra/docker/ fails the build
+    # with "open Dockerfile: no such file or directory".
+    dockerfilePath: ./Dockerfile
     dockerContext: ./apps/api
     healthCheckPath: /healthz
     # --workers 1: the free instance has 512 MB RAM. Four uvicorn workers plus

@@ -197,7 +197,7 @@ Everything else (`DJANGO_SETTINGS_MODULE`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS
 
 Files added for this:
 - `render.yaml` — the blueprint (web service only, no Render DB/Redis)
-- `infra/docker/api.render.Dockerfile` — prod image, installs `requirements/prod.txt`, runs non-root
+- `apps/api/Dockerfile` — prod image, installs `requirements/prod.txt`, runs non-root
 - `config/urls.py` — added `/healthz` for Render's health check
 - `settings/base.py` — added `whitenoise` middleware, `S3_REGION`, and made `CELERY_TASK_ALWAYS_EAGER` env-driven
 - `requirements/base.txt` — added `whitenoise`

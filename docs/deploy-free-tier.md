@@ -125,8 +125,12 @@ Setup:
    python manage.py brevo_check --sms +21699000123 # send a real test SMS
    ```
 
-5. Brevo's free plan is 300 emails/day and 300 SMS credits. SMS sender names
-   must be pre-approved in the Brevo dashboard; Tunisia delivery is best-effort.
+5. Brevo's free plan is 300 emails/day. **SMS is a separate addon** — a fresh
+   Brevo account has email only, and the transactional SMS endpoint answers
+   `400 invalid_parameter: No sms related addons are found for the given
+   organization` until you activate it under **SMS** in the dashboard (300 free
+   credits). SMS sender names must also be pre-approved; Tunisia delivery is
+   best-effort.
 
 With no API key the adapter is bypassed and OTP delivery stays a log-only no-op
 (the code is never written to logs, by design).
